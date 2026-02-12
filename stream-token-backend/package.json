@@ -1,0 +1,8 @@
+{
+  "name": "stream-token-backend",
+  "version": "1.0.0",
+  "description": "Stream Chat/Video token server for Vercel",
+  "dependencies": {
+    "stream-chat": "^8.0.0"
+  }
+}
