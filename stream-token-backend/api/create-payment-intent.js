@@ -1,7 +1,6 @@
 /**
  * Stripe PaymentIntent - Create and return client_secret for charging when accepting a bid.
  * Deploy to Vercel. Set STRIPE_SECRET_KEY in Vercel env vars.
- * 
  * Install stripe: npm install stripe
  *
  * POST body: { amount: number, currency?: string, requestId, biddingId, userId }
@@ -9,11 +8,10 @@
  *   - currency: "aed" or "usd" (default "aed"). Use "usd" if AED not enabled on your Stripe account.
  * Returns: { clientSecret: string }
  */
+
 let Stripe;
 try {
   Stripe = require('stripe');
-
-
 } catch (e) {
   console.error('Stripe package not installed. Run: npm install stripe');
 }
@@ -37,13 +35,7 @@ module.exports = async (req, res) => {
 
   const secretKey = process.env.STRIPE_SECRET_KEY;
   if (!secretKey) {
-    const stripeVars = Object.keys(process.env).filter((k) => k.toUpperCase().includes('STRIPE'));
-    console.error('Missing STRIPE_SECRET_KEY. STRIPE-related env keys:', stripeVars);
-    const body = { error: 'STRIPE_SECRET_KEY not set in Vercel environment variables' };
-    if (req.query && req.query.debug === '1') {
-      body.debug = stripeVars.length ? `Found: ${stripeVars.join(', ')} (value may be empty)` : 'No STRIPE env vars in this deployment';
-    }
-    return res.status(500).json(body);
+    return res.status(500).json({ error: 'STRIPE_SECRET_KEY not set in Vercel environment variables' });
   }
 
   try {
