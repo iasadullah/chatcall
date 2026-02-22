@@ -1,13 +1,19 @@
 /**
- * Stripe PaymentIntent - Create and return client_secret for charging rider when accepting a bid.
- * Deploy with stream-token-backend to Vercel. Set STRIPE_SECRET_KEY in Vercel env vars.
+ * Stripe PaymentIntent - Create and return client_secret for charging when accepting a bid.
+ * Deploy to Vercel. Set STRIPE_SECRET_KEY in Vercel env vars.
+ * Install stripe: npm install stripe
  *
  * POST body: { amount: number, currency?: string, requestId, biddingId, userId }
- *   - amount: in smallest currency unit (e.g. AED: 100 AED = 10000 fils)
- *   - currency: default "aed"
+ *   - amount: in smallest currency unit (e.g. AED: 1 AED = 100 fils, so 50 AED = 5000)
+ *   - currency: "aed" or "usd" (default "aed"). Use "usd" if AED not enabled on your Stripe account.
  * Returns: { clientSecret: string }
  */
-const Stripe = require('stripe');
+let Stripe;
+try {
+  Stripe = require('stripe');
+} catch (e) {
+  console.error('Stripe package not installed. Run: npm install stripe');
+}
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -22,10 +28,14 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  if (!Stripe) {
+    return res.status(500).json({ error: 'Stripe package not installed. Run: npm install stripe' });
+  }
+
   const secretKey = process.env.STRIPE_SECRET_KEY;
   if (!secretKey) {
     console.error('Missing STRIPE_SECRET_KEY');
-    return res.status(500).json({ error: 'Server misconfigured' });
+    return res.status(500).json({ error: 'STRIPE_SECRET_KEY not set in Vercel environment variables' });
   }
 
   try {
@@ -57,8 +67,8 @@ module.exports = async (req, res) => {
     res.json({ clientSecret: paymentIntent.client_secret });
   } catch (err) {
     console.error('PaymentIntent error:', err);
-    res.status(500).json({
-      error: err.message || 'Failed to create payment intent',
-    });
+    const message = err.message || 'Failed to create payment intent';
+    // Pass through Stripe errors (e.g. "Your account cannot make charges in that currency")
+    res.status(500).json({ error: message });
   }
 };
