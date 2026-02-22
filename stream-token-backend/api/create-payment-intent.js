@@ -1,6 +1,7 @@
 /**
  * Stripe PaymentIntent - Create and return client_secret for charging when accepting a bid.
  * Deploy to Vercel. Set STRIPE_SECRET_KEY in Vercel env vars.
+ * 
  * Install stripe: npm install stripe
  *
  * POST body: { amount: number, currency?: string, requestId, biddingId, userId }
@@ -11,6 +12,8 @@
 let Stripe;
 try {
   Stripe = require('stripe');
+
+  
 } catch (e) {
   console.error('Stripe package not installed. Run: npm install stripe');
 }
