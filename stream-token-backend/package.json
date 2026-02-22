@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Stream Chat/Video token server for Vercel",
   "dependencies": {
-    "stream-chat": "^8.0.0"
+    "stream-chat": "^8.0.0",
+    "stripe": "^20.3.1"
   }
 }
