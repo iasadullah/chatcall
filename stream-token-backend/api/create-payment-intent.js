@@ -13,7 +13,7 @@ let Stripe;
 try {
   Stripe = require('stripe');
 
-  
+
 } catch (e) {
   console.error('Stripe package not installed. Run: npm install stripe');
 }
@@ -37,8 +37,13 @@ module.exports = async (req, res) => {
 
   const secretKey = process.env.STRIPE_SECRET_KEY;
   if (!secretKey) {
-    console.error('Missing STRIPE_SECRET_KEY');
-    return res.status(500).json({ error: 'STRIPE_SECRET_KEY not set in Vercel environment variables' });
+    const stripeVars = Object.keys(process.env).filter((k) => k.toUpperCase().includes('STRIPE'));
+    console.error('Missing STRIPE_SECRET_KEY. STRIPE-related env keys:', stripeVars);
+    const body = { error: 'STRIPE_SECRET_KEY not set in Vercel environment variables' };
+    if (req.query && req.query.debug === '1') {
+      body.debug = stripeVars.length ? `Found: ${stripeVars.join(', ')} (value may be empty)` : 'No STRIPE env vars in this deployment';
+    }
+    return res.status(500).json(body);
   }
 
   try {
