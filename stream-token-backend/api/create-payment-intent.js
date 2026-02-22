@@ -35,7 +35,13 @@ module.exports = async (req, res) => {
 
   const secretKey = process.env.STRIPE_SECRET_KEY;
   if (!secretKey) {
-    return res.status(500).json({ error: 'STRIPE_SECRET_KEY not set in Vercel environment variables' });
+    const stripeKeys = Object.keys(process.env).filter((k) => k.toUpperCase().includes('STRIPE'));
+    return res.status(500).json({
+      error: 'STRIPE_SECRET_KEY not set in Vercel environment variables',
+      hint: stripeKeys.length
+        ? `Found: ${stripeKeys.join(', ')} — value may be empty; re-add and redeploy`
+        : 'No STRIPE vars in this deployment — add to the Vercel project that serves this URL and redeploy',
+    });
   }
 
   try {
